@@ -1,40 +1,41 @@
 #include "../include/RedisServer.h"
+#include "../include/RedisCommandHandler.h"
+#include "../include/RedisDatabase.h"
 #include <iostream>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <vector>
+#include <thread>
+#include <cstring>
+#include <signal.h>
 
 
+//created global pointer (signal handling)
 static RedisServer* globalServer = nullptr;
+
+void signalHandler(int signum){
+    if(globalServer){
+        std::cout<<"\n came signal "<<signum<<", shutting down.. \n";
+        globalServer->shutdown();
+    }
+    //returning signum integer to os after exit obv not exit(0)
+    exit(signum);
+}
 
 RedisServer::RedisServer(int port) : port(port), server_socket(-1), running(true){
     globalServer = this;
+    setupSignalHandler();
 }
 
 void RedisServer::shutdown(){
-    running = false;
-    if(server_socket != -1){
-        close(server_socket);
-    }
-    
-    std::cout<<"Server Shutdown complete \n";
+    //socket server shutdown
 }
 
 void RedisServer::run(){
-    server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if(server_socket < 0){
-        std::cerr<<"Error creating server socket \n";
-        return;
-    }
-    
-    int opt = 1;
-    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-
-    sockaddr_in serverAddr{};
-
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(port);
-    serverAddr.sin_addr.s_addr = INADDR_ANY;
-
+    //socket server start
+    //planning to use threads obv
+    //persisting DB should not be affected
+    //
 
 }

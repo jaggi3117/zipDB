@@ -4,6 +4,23 @@
 #include <thread>
 #include <chrono>
 
+// screw the lambda function syntax using normal
+void persistDatabase() {
+    while(true){
+        std::this_thread::sleep_for(std::chrono::seconds(300));
+        if(!RedisDatabase::getInstance().dump("dump.my_rcb")){
+            std::cerr<<"error dumping database\n";
+        }
+        else{
+            std::cout<<"database dumped to dump.my_rdb\n";
+        }
+    }
+}
+
+// In main()
+std::thread persistanceThread(persistDatabase);
+
+
 
 int main(int argc, char *argv[]){
     int port = 6440;
@@ -21,20 +38,9 @@ int main(int argc, char *argv[]){
     RedisServer server(port);
 
     //dump database every 180 seconds
-    std::thread persistanceThread([](){
-        while(true){
-            //put to sleep for 3 minutes then save state
-            std::this_thread::sleep_for(std::chrono::seconds(180));
-            if(!RedisDatabase::getInstance().dump("dump.my_rcb")){
-                std::cerr<<"error dumping database\n";
-            }
-            else{
-                std::cout<<"database dumped to dump.my_rdb\n";
-            }
-        }
-    });
+    std::thread persistanceThread(persistDatabase);
 
-    //so dont join later, this thread run independently forever (evern main returns)
+    //so dont join this thread later, this thread run independently forever (evern main returns)
     persistanceThread.detach();
 
     server.run();

@@ -9,11 +9,16 @@
 class RedisServer{
 public:
     RedisServer(int port);
+    void run();
+    void shutdown();
 
 private:
     int port;
     int server_socket;
     std::atomic<bool> running;
+
+    //signal handling for good healthy shutdown
+    void setupSignalHandler();
 };
 
 #endif

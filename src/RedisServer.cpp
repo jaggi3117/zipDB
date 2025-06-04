@@ -30,12 +30,49 @@ RedisServer::RedisServer(int port) : port(port), server_socket(-1), running(true
 
 void RedisServer::shutdown(){
     //socket server shutdown
+    running = false; //atomic op
+    if(server_socket != -1){
+        //persisting database
+        if(RedisDatabase::getInstance().dump("dump.my_rdb")){
+            std::cout<<"persistance process success \n";
+        }
+        else{
+            std::cerr<<"Error dumping database \n";
+        }
+        close(server_socket); //close sys call
+    }
+    std::cout<<"server shutdown complete \n";
 }
 
 void RedisServer::run(){
-    //socket server start
-    //planning to use threads obv
-    //persisting DB should not be affected
-    //
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if(server_socket < 0){
+        std::cerr<<"can not create socket \n";
+        return;
+    }
 
+    int opt = 1; //option level for tcp protocol going to be used in socket
+    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
+    sockaddr_in serverAddr{}; //sockaddr_in struct instance for socket config
+    
+    serverAddr.sin_family = AF_INET; //ipv4
+    serverAddr.sin_port = htons(port); //convert to network system
+    serverAddr.sin_addr.s_addr = INADDR_ANY; //can accept from any ip 
+
+    if(bind(server_socket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0){
+        std::cerr<<"socket bind failed in server \n";
+        return;
+    }
+
+    //max pending connections -> 10
+    //making socket passive -> later on accept sys call
+    //clien::connect() and server::accept() connection between these sates are backlog thats why set 10
+    if(listen(server_socket, 10) < 0){
+        std::cerr<<"server listen errror \n";
+        return;
+    }
+
+    std::cout<<"redis server listening on port "<<port<<"\n";
+    
 }

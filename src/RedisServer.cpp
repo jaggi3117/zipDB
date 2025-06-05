@@ -78,10 +78,16 @@ void RedisServer::run(){
     std::vector<std::thread> threads;
     RedisCommandHandler cmdHandler; //implement later 
 
-    //todo 1. while true loop (accept sys call to accept clients)
-    //2. threads to distribute work
-    //3. close sys call to close connection between particular client 
-    // 4. after finish join threads
-    //5. persist client insertions of data 
+    while(running){
+        int client_socket = accept(server_socket, nullptr, nullptr);
+        if(client_socket < 0){
+            if(running){
+                std::cerr<<"error accepting client connection \n";
+                break;
+            }
+        }
+
+        
+    }
 
 }

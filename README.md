@@ -74,7 +74,7 @@ make clean
 ## ▶️ Running the Server
 
 ```bash
-./zipDB         # Uses default port 6379
+./zipDB         # Uses default port 6440
 ./zipDB 6441   # Uses custom port
 ```
 
@@ -114,7 +114,7 @@ Gracefully shutdown with `Ctrl+C` to save data.
   * `unordered_map<string, vector<string>>` for lists
   * `unordered_map<string, unordered_map<string, string>>` for hashes
 * **TTL Handling**: Lazy cleanup with `expiry_map`
-* **Persistence**: File-based dump every 300s + on shutdown (`dump.my_rdb`)
+* **Persistence**: File-based dump every 180s + on shutdown (`dump.my_rdb`)
 * **Singleton Pattern**: Central database instance via `RedisDatabase::getInstance()`
 * **RESP Protocol**: Parser in `RedisCommandHandler` (handles inline & array modes)
 
